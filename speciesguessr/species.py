@@ -9,7 +9,7 @@ import os
 
 from pyinaturalist import get_observation_species_counts
 
-class Species:
+class SpeciesInfo:
     def __init__(self, place_id, taxon_id, language):
         self.place_id = place_id
         self.taxon_id = taxon_id
