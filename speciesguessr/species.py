@@ -6,6 +6,7 @@ Created on Sun Oct 30 20:55:57 2022
 """
 import json
 import os
+from time import time
 
 from pyinaturalist import get_observation_species_counts
 
@@ -23,6 +24,7 @@ class SpeciesInfo:
             self.save_species_list(filename)
 
     def find_species(self):
+        t = time()
         species_list = []
         page = 1
         kwargs = {"place_id": self.place_id, "taxon_id": self.taxon_id,
@@ -30,12 +32,17 @@ class SpeciesInfo:
                   "rank": "species"}
         response = get_observation_species_counts(page=page, **kwargs)
         for res in response["results"]:
+            if "preferred_common_name" not in res["taxon"]:
+                continue
             species_list.append(res["taxon"])
         while len(response["results"]) != 0:
             page += 1
             response = get_observation_species_counts(page=page, **kwargs)
             for res in response["results"]:
+                if "preferred_common_name" not in res["taxon"]:
+                    continue
                 species_list.append(res["taxon"])
+        print(f"Species found in {round(time()-t, 2)}s")
         return species_list
 
     def save_species_list(self, filename):

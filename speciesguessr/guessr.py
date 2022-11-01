@@ -21,10 +21,11 @@ class Guessr:
         kwargs = {"taxon_id": species_id, "locale": "language",
                   "quality_grade": "research", "photos": True}
         nb_obs = get_observations(per_page=0, **kwargs)["total_results"]
-
+        if nb_obs == 0:
+            print(species_id)
         def try_find_obs(kwargs, nb_obs):
             try:
-                page = randint(0, nb_obs-1)
+                page = randint(0, min(nb_obs-1, 9999))
                 obs = get_observations(per_page=1, page=page, **kwargs)
                 return Observation.from_json_list(obs)[0]
             except HTTPError:
