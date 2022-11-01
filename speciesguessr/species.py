@@ -7,10 +7,13 @@ Created on Sun Oct 30 20:55:57 2022
 from pyinaturalist import get_observation_species_counts
 
 class SpeciesInfo:
-    def __init__(self, place_id, taxon_id, language):
-        self.place_id = place_id
-        self.taxon_id = taxon_id
-        self.language = language
+    def __init__(self, config):
+        self.place_id = config.place_id
+        self.taxon_id = config.taxon_id
+        self.language = config.language
+        self.latin = (config.language == "latin")
+        if self.latin:
+            self.language = "en"
 
         self.species_list = self.find_species()
 
@@ -24,6 +27,8 @@ class SpeciesInfo:
         for res in response["results"]:
             if "preferred_common_name" not in res["taxon"]:
                 continue
+            if self.latin:
+                res["taxon"]["preferred_common_name"] = res["taxon"]["name"]
             species_list.append(res["taxon"])
         while len(response["results"]) != 0:
             page += 1
@@ -31,5 +36,7 @@ class SpeciesInfo:
             for res in response["results"]:
                 if "preferred_common_name" not in res["taxon"]:
                     continue
+                if self.latin:
+                    res["taxon"]["preferred_common_name"] = res["taxon"]["name"]
                 species_list.append(res["taxon"])
         return species_list

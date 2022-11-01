@@ -13,18 +13,18 @@ from speciesguessr.guessr import Guessr
 from speciesguessr.utils import set_answers, get_new_guess
 
 class Config():
-    def __init__(self, place_id, taxon_id, language):
-        self.place_id = place_id
-        self.taxon_id = taxon_id
-        self.language = language
+    def __init__(self):
+        self.place_id = 6753 # 162266 for mtp
+        self.taxon_id = 3
+        self.language = "fr"
         w, h = sg.Window.get_screen_size()
         self.height = h - 200
         self.width = w - 100
         self.image_quality = "large"
 
-config = Config(6753, 3, "fr") # 162266 for mtp
+config = Config()
 
-species_info = SpeciesInfo(config.place_id, config.taxon_id, config.language)
+species_info = SpeciesInfo(config)
 guessr = Guessr(species_info)
 species_to_guess, image = get_new_guess(guessr, config)
 
