@@ -21,7 +21,8 @@ class Guessr:
                   "quality_grade": "research", "photos": True}
         nb_obs = get_observations(per_page=0, **kwargs)["total_results"]
         if nb_obs == 0:
-            print(species_id)
+            return None
+
         def try_find_obs(kwargs, nb_obs):
             try:
                 page = randint(0, min(nb_obs-1, 9999))

@@ -20,6 +20,7 @@ class Config():
         w, h = sg.Window.get_screen_size()
         self.height = h - 200
         self.width = w - 100
+        self.image_quality = "large"
 
 config = Config(6753, 3, "fr") # 162266 for mtp
 
@@ -29,10 +30,10 @@ species_to_guess, image = get_new_guess(guessr, config)
 
 sg.theme('Reddit')
 layout = [[sg.Image(key="-IMAGE-", size=(config.width, config.height))],
-          [sg.Button(key='A1', expand_x=True, font=('Helvetica', 13)), 
-           sg.Button(key='A2', expand_x=True, font=('Helvetica', 13)),
-           sg.Button(key='A3', expand_x=True, font=('Helvetica', 13)),
-           sg.Button(key='A4', expand_x=True, font=('Helvetica', 13))]]
+          [sg.Button(key='A1', expand_x=True, font=('Helvetica', 15)), 
+           sg.Button(key='A2', expand_x=True, font=('Helvetica', 15)),
+           sg.Button(key='A3', expand_x=True, font=('Helvetica', 15)),
+           sg.Button(key='A4', expand_x=True, font=('Helvetica', 15))]]
 
 window = sg.Window('SpeciesGuessr', layout, location=(20, 30), finalize=True,
                    return_keyboard_events=True)
