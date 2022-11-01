@@ -10,8 +10,8 @@ from random import shuffle
 
 def load_image(obs, config):
     image = Image.open(obs.photos[0].open(size="large"))
-    image = image.resize((min(config.max_width, int(config.height / image.size[1] * image.size[0])), config.height))
-    image = pad(image, (config.max_width, config.height), color="white")
+    image = image.resize((min(config.width, int(config.height / image.size[1] * image.size[0])), config.height))
+    image = pad(image, (config.width, config.height), color="white")
     return image
 
 def set_answers(guessr, window, species_to_guess):

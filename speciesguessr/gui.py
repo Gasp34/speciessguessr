@@ -17,8 +17,9 @@ class Config():
         self.place_id = place_id
         self.taxon_id = taxon_id
         self.language = language
-        self.height = 500
-        self.max_width = 1100
+        w, h = sg.Window.get_screen_size()
+        self.height = h - 200
+        self.width = w - 100
 
 config = Config(6753, 3, "fr") # 162266 for mtp
 
@@ -26,15 +27,15 @@ species_info = SpeciesInfo(config.place_id, config.taxon_id, config.language)
 guessr = Guessr(species_info)
 species_to_guess, image = get_new_guess(guessr, config)
 
-sg.theme('Reddit') # Add a touch of color
-layout = [[sg.Image(key="-IMAGE-", size=(config.max_width, config.height))],
+sg.theme('Reddit')
+layout = [[sg.Image(key="-IMAGE-", size=(config.width, config.height))],
           [sg.Button(key='A1', expand_x=True, font=('Helvetica', 13)), 
            sg.Button(key='A2', expand_x=True, font=('Helvetica', 13)),
            sg.Button(key='A3', expand_x=True, font=('Helvetica', 13)),
            sg.Button(key='A4', expand_x=True, font=('Helvetica', 13))]]
 
 window = sg.Window('SpeciesGuessr', layout, location=(20, 30), finalize=True,
-                   return_keyboard_events=True, use_default_focus=False)
+                   return_keyboard_events=True)
 window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
 answers = set_answers(guessr, window, species_to_guess)
 window.TKroot.focus_force()
