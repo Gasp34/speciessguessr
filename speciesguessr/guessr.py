@@ -4,7 +4,6 @@ Created on Mon Oct 31 17:52:57 2022
 
 @author: ZenbookGaspard
 """
-import json
 from random import randint
 from pyinaturalist import get_observations, Observation
 from requests import HTTPError
@@ -29,13 +28,6 @@ class Guessr:
                 obs = get_observations(per_page=1, page=page, **kwargs)
                 return Observation.from_json_list(obs)[0]
             except HTTPError:
-                print("httperror")
-                with open("httperrors.json", 'r', encoding='utf-8') as f:
-                    httperrors = json.load(f)
-                httperrors["page"].append(page)
-                httperrors["nb_page"].append(nb_obs)
-                with open("httperrors.json", 'w', encoding='utf-8') as f:
-                    json.dump(httperrors, f, ensure_ascii=False, indent=4)
                 return None
         
         obs = try_find_obs(kwargs, nb_obs)
