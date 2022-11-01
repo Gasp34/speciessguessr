@@ -8,6 +8,7 @@ from pyinaturalist import get_observation_species_counts
 
 class SpeciesInfo:
     def __init__(self, config):
+        self.config = config
         self.place_id = config.place_id
         self.taxon_id = config.taxon_id
         self.language = config.language
@@ -22,7 +23,7 @@ class SpeciesInfo:
         page = 1
         kwargs = {"place_id": self.place_id, "taxon_id": self.taxon_id,
                   "locale": self.language, "captive": False, 
-                  "rank": "species"}
+                  "rank": "species", "popular": self.config.popular}
         response = get_observation_species_counts(page=page, **kwargs)
         for res in response["results"]:
             if "preferred_common_name" not in res["taxon"]:
