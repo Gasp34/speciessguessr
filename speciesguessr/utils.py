@@ -35,7 +35,7 @@ def taxon_to_id(taxon, text_dict, lang):
     try:
         return int(taxon)
     except ValueError:
-        place_ids = [3, 34]
+        place_ids = [3, 26036]
         return place_ids[text_dict["taxons"][lang].index(taxon)]
 
 text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"},
@@ -46,6 +46,7 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "checkbox2": {"fr": "Espèces populaires", "en": "Popular species"},
              "easy": {"fr": "Facile", "en": "Easy"},
              "hard": {"fr": "Difficile", "en": "Hard"},
+             "species": {"fr": "Espèces", "en": "Species"},
              "taxon": {"fr": "Taxon", "en": "Taxon"},
              "taxons": {"fr": ["Oiseau", "Reptile"], "en": ["Bird", "Reptile"]},
              "place": {"fr": "Zone géographique", "en": "Geographical area"},

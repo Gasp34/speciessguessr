@@ -17,6 +17,7 @@ class SpeciesInfo:
             self.language = "en"
 
         self.species_list = self.find_species()
+        self.nb_species = len(self.species_list)
 
     def find_species(self):
         species_list = []
