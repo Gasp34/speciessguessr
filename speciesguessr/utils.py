@@ -22,16 +22,7 @@ def set_answers(guessr, window, species_to_guess):
     
     for i in range(4):
         window[f"A{i+1}"].update(answers[i]["preferred_common_name"].capitalize(), button_color=('#FFFFFF', '#0079d3'))
-    return answers
-
-def get_new_guess(guessr, config):
-    species_to_guess = guessr.get_random_species()
-    obs = guessr.find_obs_with_photo(species_to_guess["id"])
-    while obs is None:
-        species_to_guess = guessr.get_random_species()
-        obs = guessr.find_obs_with_photo(species_to_guess["id"])
-    image = load_image(obs, config)
-    return species_to_guess, image  
+    return answers 
 
 def place_to_id(place, text_dict, lang):
     try:

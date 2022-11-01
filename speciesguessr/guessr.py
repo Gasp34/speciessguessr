@@ -8,6 +8,9 @@ from random import randint
 from pyinaturalist import get_observations, Observation
 from requests import HTTPError
 
+from speciesguessr.utils import load_image
+
+
 class Guessr:
     def __init__(self, species_info):
         self.species_info = species_info
@@ -39,3 +42,12 @@ class Guessr:
     def show_photo_and_species(self, obs, species_to_guess):
         obs.photos[0].show()
         print(species_to_guess["preferred_common_name"], species_to_guess["name"], sep=", ")
+
+    def get_new_guess(self, config):
+        species_to_guess = self.get_random_species()
+        obs = self.find_obs_with_photo(species_to_guess["id"])
+        while obs is None:
+            species_to_guess = self.get_random_species()
+            obs = self.find_obs_with_photo(species_to_guess["id"])
+        image = load_image(obs, config)
+        return species_to_guess, image

@@ -10,7 +10,7 @@ from time import sleep
 
 from speciesguessr.species import SpeciesInfo
 from speciesguessr.guessr import Guessr
-from speciesguessr.utils import set_answers, get_new_guess, taxon_to_id, place_to_id, text_dict, lang_dict
+from speciesguessr.utils import set_answers, taxon_to_id, place_to_id, text_dict, lang_dict
 
 
 class Config():
@@ -76,12 +76,27 @@ if mode:
                     taxon_id=taxon_to_id(values["taxons"], text_dict, lang),
                     popular=values["C2"])
     print(vars(config))
-
-if mode == "easy":
+    end = False
     species_info = SpeciesInfo(config)
-    guessr = Guessr(species_info)
-    species_to_guess, image = get_new_guess(guessr, config)
-    
+
+    if species_info.species_list == None:
+        end = True
+        layout = [[sg.Text({"fr": "Communication avec iNaturalist impossible\nVerifier la connexion internet",
+                            "en": "Failed communication with iNaturalist\nCheck internet connection"}[lang])],
+                  [sg.Ok()]]
+        window = sg.Window('SpeciesGuessr', layout, font=('Helvetica', 15), finalize=True)
+        while True:
+            event, values = window.read()
+            if event in (sg.WIN_CLOSED, "Ok"):
+                break
+        window.close()
+    else:
+          guessr = Guessr(species_info)
+          species_to_guess, image = guessr.get_new_guess(config)
+  
+
+if mode == "easy" and not end:
+
     layout = [[sg.Image(key="-IMAGE-", size=(config.width, config.height))],
               [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
                             sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
@@ -97,7 +112,7 @@ if mode == "easy":
     window.TKroot.focus_force()
     
     success, fails = 0, 0
-    while True:
+    while not end:
         event, values = window.read()
         if event == sg.WIN_CLOSED or event == 'Escape:27':
             break
@@ -119,9 +134,7 @@ if mode == "easy":
             if fail:
                 sleep(1)
     
-            species_to_guess, image = get_new_guess(guessr, config)
+            species_to_guess, image = guessr.get_new_guess(config)
             window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
             answers = set_answers(guessr, window, species_to_guess)
-    
     window.close()
-
