@@ -118,13 +118,17 @@ if mode in ["easy", "medium"] and not end:
 
     window.TKroot.focus_force()
 
-    success, fails = 0, 0
+    verify, success, fails = False, 0, 0
     while not end:
         event, values = window.read()
+        print(event, type(event))
         if event == sg.WIN_CLOSED or event == 'Escape:27':
             break
-        if type(event) == str and event[0] == "A":
-            i = int(event[1])
+        if type(event) == str and (event[0] == "A"):
+            verify, i = True, int(event[1])
+        elif type(event) == str and event in ["1", "2", "3", "4"]:
+            verify, i = True, int(event[0])
+        if verify:
             if species_to_guess == answers[i-1]:
                 fail = False
                 success += 1
@@ -143,9 +147,10 @@ if mode in ["easy", "medium"] and not end:
 
             species_to_guess, image, attribution = guessr.get_new_guess(config)
             window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
-            window["attribution"].update(attribution)
+            window["attribution"].update(f"     Photo : {attribution}")
             if mode == "easy":
                 answers = set_random_answers(guessr, window, species_to_guess)
             elif mode == "medium":
                 answers = set_neighbor_answers(guessr, window, species_to_guess)
+            verify = False
     window.close()
