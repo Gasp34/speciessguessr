@@ -14,7 +14,7 @@ from speciesguessr.utils import load_image
 class Guessr:
     def __init__(self, species_info):
         self.species_info = species_info
-        
+
     def get_random_species(self):
         i = randint(0, len(self.species_info.species_list)-1)
         return self.species_info.species_list[i]
@@ -33,7 +33,7 @@ class Guessr:
                 return Observation.from_json_list(obs)[0]
             except HTTPError:
                 return None
-        
+
         obs = try_find_obs(kwargs, nb_obs)
         while obs is None:
             obs = try_find_obs(kwargs, nb_obs)
@@ -43,11 +43,16 @@ class Guessr:
         obs.photos[0].show()
         print(species_to_guess["preferred_common_name"], species_to_guess["name"], sep=", ")
 
-    def get_new_guess(self, config):
+    def get_new_guess(self, config, window=None):
         species_to_guess = self.get_random_species()
         obs = self.find_obs_with_photo(species_to_guess["id"])
+        if window:
+            window["pb"].update(2)
         while obs is None:
             species_to_guess = self.get_random_species()
             obs = self.find_obs_with_photo(species_to_guess["id"])
         image = load_image(obs, config)
-        return species_to_guess, image
+        if window:
+            window["pb"].update(2)
+        attribution = obs.photos[0].attribution
+        return species_to_guess, image, attribution

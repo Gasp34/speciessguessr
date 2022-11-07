@@ -4,7 +4,10 @@ Created on Sun Oct 30 20:55:57 2022
 
 @author: ZenbookGaspard
 """
+from igraph import Graph
+
 from pyinaturalist import get_observation_species_counts
+
 
 class SpeciesInfo:
     def __init__(self, config):
@@ -19,11 +22,22 @@ class SpeciesInfo:
         self.species_list = self.find_species()
         self.nb_species = len(self.species_list)
 
+        self.species_ids = []
+        self.species_idx = {}
+        edges = []
+        for j, species in enumerate(self.species_list):
+            ancestors = species["ancestor_ids"]
+            for i in range(len(ancestors)-1):
+                edges += [(ancestors[i], ancestors[i+1])]
+            self.species_ids.append(species["id"])
+            self.species_idx[species["id"]] = j
+        self.graph = Graph(edges)
+
     def find_species(self):
         species_list = []
         page = 1
         kwargs = {"place_id": self.place_id, "taxon_id": self.taxon_id,
-                  "locale": self.language, "captive": False, 
+                  "locale": self.language, "captive": False,
                   "rank": "species", "popular": self.config.popular}
         try:
             response = get_observation_species_counts(page=page, **kwargs)

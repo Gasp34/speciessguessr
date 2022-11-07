@@ -6,7 +6,8 @@ Created on Tue Nov  1 11:22:23 2022
 """
 from PIL import Image
 from PIL.ImageOps import pad
-from random import shuffle
+from random import shuffle, randint
+
 
 def load_image(obs, config):
     image = Image.open(obs.photos[0].open(size=config.image_quality))
@@ -14,15 +15,53 @@ def load_image(obs, config):
     image = pad(image, (config.width, config.height), color="white")
     return image
 
-def set_answers(guessr, window, species_to_guess):
+
+def set_random_answers(guessr, window, species_to_guess):
     answers = [species_to_guess]
-    for i in range(3):
-        answers.append(guessr.get_random_species())
+    if guessr.species_info.nb_species >= 4:
+        while len(answers) != 4:
+            rand_species = guessr.get_random_species()
+            if rand_species not in answers:
+                answers.append(rand_species)
+    else:
+        for i in range(3):
+            answers.append(guessr.get_random_species())
     shuffle(answers)
-    
+
     for i in range(4):
         window[f"A{i+1}"].update(answers[i]["preferred_common_name"].capitalize(), button_color=('#FFFFFF', '#0079d3'))
-    return answers 
+    return answers
+
+
+def set_neighbor_answers(guessr, window, species_to_guess):
+    answers = [species_to_guess]
+    graph = guessr.species_info.graph
+
+    if guessr.species_info.nb_species >= 4:
+        order = 0
+        possible_answers = []
+        while len(possible_answers) < 4:
+            order += 1
+            possible_answers = [i for i in graph.neighborhood(species_to_guess["id"], order=order)
+                                if i in guessr.species_info.species_ids]
+        possible_answers.pop(possible_answers.index(species_to_guess["id"]))
+
+        while len(answers) != 4:
+            i = randint(0, len(possible_answers) - 1)
+            species_idx = guessr.species_info.species_idx[possible_answers[i]]
+            rand_species = guessr.species_info.species_list[species_idx]
+            if rand_species not in answers:
+                answers.append(rand_species)
+    else:
+        for i in range(3):
+            answers.append(guessr.get_random_species())
+
+    shuffle(answers)
+
+    for i in range(4):
+        window[f"A{i+1}"].update(answers[i]["preferred_common_name"].capitalize(), button_color=('#FFFFFF', '#0079d3'))
+    return answers
+
 
 def place_to_id(place, text_dict, lang):
     try:
@@ -31,12 +70,14 @@ def place_to_id(place, text_dict, lang):
         place_ids = [6753, 162266]
         return place_ids[text_dict["places"][lang].index(place)]
 
+
 def taxon_to_id(taxon, text_dict, lang):
     try:
         return int(taxon)
     except ValueError:
         place_ids = [3, 26036]
         return place_ids[text_dict["taxons"][lang].index(taxon)]
+
 
 text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"},
              "languages": {"fr": ["français", "english"], "en": ["english", "français"]},
@@ -46,6 +87,7 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "checkbox2": {"fr": "Espèces populaires", "en": "Popular species"},
              "easy": {"fr": "Facile", "en": "Easy"},
              "hard": {"fr": "Difficile", "en": "Hard"},
+             "medium": {"fr": "Moyen", "en": "Medium"},
              "species": {"fr": "Espèces", "en": "Species"},
              "taxon": {"fr": "Taxon", "en": "Taxon"},
              "taxons": {"fr": ["Oiseau", "Reptile"], "en": ["Bird", "Reptile"]},
