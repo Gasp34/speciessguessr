@@ -20,6 +20,9 @@ class SpeciesInfo:
             self.language = "en"
 
         self.species_list = self.find_species()
+        self.species_list.sort(key=lambda d: d["preferred_common_name"].capitalize())
+        self.species_name = [s["preferred_common_name"].capitalize() for s in self.species_list]
+
         self.nb_species = len(self.species_list)
 
         self.species_ids = []
@@ -35,6 +38,7 @@ class SpeciesInfo:
 
     def find_species(self):
         species_list = []
+        species_name = []
         page = 1
         kwargs = {"place_id": self.place_id, "taxon_id": self.taxon_id,
                   "locale": self.language, "captive": False,
@@ -46,7 +50,13 @@ class SpeciesInfo:
                     continue
                 if self.latin:
                     res["taxon"]["preferred_common_name"] = res["taxon"]["name"]
-                species_list.append(res["taxon"])
+                if res["taxon"]["name"] not in species_name:
+                    species_name.append(res["taxon"]["name"])
+                    species_list.append(res["taxon"])
+                else:
+                    idx = species_name.index(res["taxon"]["name"])
+                    if species_list[idx]["observations_count"] < res["taxon"]["observations_count"]:
+                        species_list[idx] = res["taxon"]
             while len(response["results"]) != 0:
                 page += 1
                 response = get_observation_species_counts(page=page, **kwargs)
@@ -55,7 +65,13 @@ class SpeciesInfo:
                         continue
                     if self.latin:
                         res["taxon"]["preferred_common_name"] = res["taxon"]["name"]
-                    species_list.append(res["taxon"])
+                    if res["taxon"]["name"] not in species_name:
+                        species_name.append(res["taxon"]["name"])
+                        species_list.append(res["taxon"])
+                    else:
+                        idx = species_name.index(res["taxon"]["name"])
+                        if species_list[idx]["observations_count"] < res["taxon"]["observations_count"]:
+                            species_list[idx] = res["taxon"]
             return species_list
         except:
             print("Connection with inaturalist failed")

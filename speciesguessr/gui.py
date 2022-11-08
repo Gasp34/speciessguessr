@@ -58,13 +58,13 @@ while not mode and not end:
     window.TKroot.focus_force()
     while True:
         event, values = window.read()
-        if event == sg.WIN_CLOSED or event == 'Escape:27':
+        if event == sg.WIN_CLOSED or event.startswith('Escape'):
             end = True
             break
         if event == "languages":
             lang = lang_dict[values["languages"]]
             break
-        if event in ["easy", "medium"]:
+        if event in ["easy", "medium", "hard"]:
             mode = event
             break
         if event == "C1":
@@ -77,6 +77,8 @@ while not mode and not end:
                         place_id=place_to_id(values["places"], text_dict, lang),
                         taxon_id=taxon_to_id(values["taxons"], text_dict, lang),
                         popular=values["C2"])
+        if mode == "hard":
+            config.height -= 100
         # print(vars(config))
         end = False
         species_info = SpeciesInfo(config)
@@ -96,7 +98,7 @@ while not mode and not end:
         else:
             guessr = Guessr(species_info)
             species_to_guess, image, attribution = guessr.get_new_guess(config, window)
-        window.close()
+    window.close()
 
     if mode in ["easy", "medium"] and not end:
         layout = [[sg.Column([[sg.Text(f"{values['places']} - {values['taxons']} - {species_info.nb_species} {text_dict['species'][lang]}"),
@@ -121,7 +123,7 @@ while not mode and not end:
         verify, success, fails = False, 0, 0
         while not end:
             event, values = window.read()
-            if event == sg.WIN_CLOSED or event == 'Escape:27':
+            if event == sg.WIN_CLOSED or event.startswith('Escape'):
                 mode = False
                 break
             if type(event) == str and (event[0] == "A"):
@@ -145,6 +147,99 @@ while not mode and not end:
                 if fail:
                     sleep(1)
     
+                species_to_guess, image, attribution = guessr.get_new_guess(config)
+                window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
+                window["attribution"].update(f"     Photo : {attribution}")
+                if mode == "easy":
+                    answers = set_random_answers(guessr, window, species_to_guess)
+                elif mode == "medium":
+                    answers = set_neighbor_answers(guessr, window, species_to_guess)
+                verify = False
+        window.close()
+
+    if mode in ["hard"] and not end:
+        input_width = 50
+        num_items_to_show = 3
+        choices = species_info.species_name
+
+        layout = [[sg.Column([[sg.Text(f"{values['places']} - {values['taxons']} - {species_info.nb_species} {text_dict['species'][lang]}"),
+                               sg.Text(f"     Photo : {attribution}", key="attribution")]], justification="center")],
+                  [sg.Image(key="-IMAGE-", size=(config.width, config.height))],
+                  [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
+                               sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
+                             justification="center")],
+                  [sg.Column([[sg.Input(size=(input_width, 1), enable_events=True, key='-IN-')],
+                  [sg.pin(sg.Col([[sg.Listbox(values=[], size=(input_width, num_items_to_show), enable_events=True, key='-BOX-',
+                                              select_mode=sg.LISTBOX_SELECT_MODE_SINGLE, no_scrollbar=True)]],
+                   key='-BOX-CONTAINER-', pad=(0, 0), visible=False))]], justification="center")]
+                  ]
+
+        window = sg.Window('SpeciesGuessr', layout, location=(20, 20), finalize=True,
+                           return_keyboard_events=True, font=('Helvetica', 15), icon="logo.ico", size=(config.width, config.height+215))
+        window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
+        window.TKroot.focus_force()
+        list_element: sg.Listbox = window.Element('-BOX-')
+        prediction_list, input_text, sel_item = [], "", 0
+
+        verify, success, fails = False, 0, 0
+        while not end:
+            event, values = window.read()
+            print(event, values)
+            if event == sg.WIN_CLOSED or event.startswith('Escape'):
+                # mode = False
+                break
+            elif event.startswith('Down') and len(prediction_list):
+                sel_item = (sel_item + 1) % len(prediction_list)
+                list_element.update(set_to_index=sel_item, scroll_to_index=sel_item)
+            elif event.startswith('Up') and len(prediction_list):
+                sel_item = (sel_item + (len(prediction_list) - 1)) % len(prediction_list)
+                list_element.update(set_to_index=sel_item, scroll_to_index=sel_item)
+            elif event == '\r':
+                if len(values['-BOX-']) > 0:
+                    window['-IN-'].update(value=values['-BOX-'][0])
+                    window['-BOX-CONTAINER-'].update(visible=False)
+            elif event == '-IN-':
+                text = values['-IN-'].lower()
+                if text == input_text:
+                    continue
+                else:
+                    input_text = text
+                prediction_list = []
+                if text:
+                    prediction_list = [item for item in choices if item.lower().startswith(text)]
+                print(prediction_list)
+                list_element.update(values=prediction_list)
+                sel_item = 0
+                list_element.update(set_to_index=sel_item)
+                if len(prediction_list) > 0:
+                    window['-BOX-CONTAINER-'].update(visible=True)
+                else:
+                    window['-BOX-CONTAINER-'].update(visible=False)
+            elif event == '-BOX-':
+                window['-IN-'].update(value=values['-BOX-'][0])
+                window['-BOX-CONTAINER-'].update(visible=False)
+
+            if type(event) == str and (event[0] == "A"):
+                verify, i = True, int(event[1])
+            elif type(event) == str and event in ["1", "2", "3", "4"]:
+                verify, i = True, int(event[0])
+            if verify:
+                if species_to_guess == answers[i-1]:
+                    fail = False
+                    success += 1
+                    window[f"A{i}"].update(button_color="green")
+                else:
+                    fail = True
+                    fails += 1
+                    window[f"A{i}"].update(button_color="red")
+                    j = answers.index(species_to_guess)
+                    window[f"A{j+1}"].update(button_color="green")
+                window["-SV-"].update(f"{success}/{success+fails}")
+                window["-AV-"].update(f"{int(success/(success+fails)*100)}%")
+                window.refresh()
+                if fail:
+                    sleep(1)
+
                 species_to_guess, image, attribution = guessr.get_new_guess(config)
                 window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
                 window["attribution"].update(f"     Photo : {attribution}")
