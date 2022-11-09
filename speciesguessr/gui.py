@@ -168,16 +168,17 @@ while not mode and not end:
                   [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
                                sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
                              justification="center")],
-                  [sg.Column([[sg.Input(size=(input_width, 1), enable_events=True, key='-IN-')],
+                  [sg.Column([[sg.Input(size=(input_width, 1), enable_events=True, key='-IN-', focus=True)],
                   [sg.pin(sg.Col([[sg.Listbox(values=[], size=(input_width, num_items_to_show), enable_events=True, key='-BOX-',
                                               select_mode=sg.LISTBOX_SELECT_MODE_SINGLE, no_scrollbar=True)]],
-                   key='-BOX-CONTAINER-', pad=(0, 0), visible=False))]], justification="center")]
+                   key='-BOX-CONTAINER-', pad=(0, 0), visible=False))],
+                  [sg.Text('', key="-ANSWER-", font=('Helvetica', 20))]], justification="center")]
                   ]
 
         window = sg.Window('SpeciesGuessr', layout, location=(20, 20), finalize=True,
                            return_keyboard_events=True, font=('Helvetica', 15), icon="logo.ico", size=(config.width, config.height+215))
         window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
-        window.TKroot.focus_force()
+        # window.TKroot.focus_force()
         list_element: sg.Listbox = window.Element('-BOX-')
         prediction_list, input_text, sel_item = [], "", 0
 
@@ -193,7 +194,7 @@ while not mode and not end:
             elif event.startswith('Up') and len(prediction_list):
                 sel_item = (sel_item + (len(prediction_list) - 1)) % len(prediction_list)
                 list_element.update(set_to_index=sel_item, scroll_to_index=sel_item)
-            elif event == '\r':
+            elif event == '\r' or event.startswith("Return"):
                 if len(values['-BOX-']) > 0:
                     window['-IN-'].update(value=values['-BOX-'][0])
                     window['-BOX-CONTAINER-'].update(visible=False)
@@ -224,9 +225,12 @@ while not mode and not end:
                 if guess == species_to_guess["preferred_common_name"]:
                     fail = False
                     success += 1
+                    window["-ANSWER-"].update(species_to_guess["preferred_common_name"], text_color="green")
                 else:
                     fail = True
                     fails += 1
+                    window["-ANSWER-"].update(species_to_guess["preferred_common_name"], text_color="red")
+
                 window["-SV-"].update(f"{success}/{success+fails}")
                 window["-AV-"].update(f"{int(success/(success+fails)*100)}%")
                 window.refresh()
@@ -238,5 +242,6 @@ while not mode and not end:
                 window["attribution"].update(f"     Photo : {attribution}")
                 window['-IN-'].update('')
                 window['-BOX-CONTAINER-'].update(visible=False)
+                window["-ANSWER-"].update("")
                 verify = False
         window.close()
