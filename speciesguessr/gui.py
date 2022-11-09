@@ -99,7 +99,10 @@ while not mode and not end:
             species_to_guess, image, attribution = guessr.get_new_guess(config, window)
     window.close()
 
-    layout = [[sg.Column([[sg.Text(f"{values['places']} - {values['taxons']} - {species_info.nb_species} {text_dict['species'][lang]}"),
+    text = f"{values['places']} - {values['taxons']} - {text_dict['popular'][lang] + ' - ' if config.popular else ''}"
+    text += f"{species_info.nb_species} {text_dict['species'][lang]}"
+
+    layout = [[sg.Column([[sg.Text(text),
                            sg.Text(f"     Photo : {attribution}", key="attribution"),
                            sg.Button(text_dict["change"][lang], key="Reload")]], justification="center")],
               [sg.Image(key="-IMAGE-", size=(config.width, config.height))],

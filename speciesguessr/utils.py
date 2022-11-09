@@ -75,7 +75,7 @@ def taxon_to_id(taxon, text_dict, lang):
     try:
         return int(taxon)
     except ValueError:
-        place_ids = [3, 26036, 47157]
+        place_ids = [3, 20978, 47158, 40151, 26036, 47157, 47178]
         return place_ids[text_dict["taxons"][lang].index(taxon)]
 
 
@@ -90,8 +90,10 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "medium": {"fr": "Moyen", "en": "Medium"},
              "change": {"fr": "Changer", "en": "Change"},
              "species": {"fr": "Espèces", "en": "Species"},
+             "popular": {"fr": "Populaire", "en": "Popular"},
              "taxon": {"fr": "Taxon", "en": "Taxon"},
-             "taxons": {"fr": ["Oiseaux", "Reptiles", "Papillons"], "en": ["Bird", "Reptile", "Butterfly"]},
+             "taxons": {"fr": ["Oiseaux", "Amphibiens", "Insectes", "Mammifères", "Reptiles", "Papillons", "Poissons"],
+                        "en": ["Bird", "Amphibian", "Insect", "Mammals", "Reptile", "Butterfly", "Fish"]},
              "place": {"fr": "Zone géographique", "en": "Geographical area"},
              "places": {"fr": ["France", "Europe", "Montpellier"], "en": ["France", "Europe", "Montpellier"]}}
 
