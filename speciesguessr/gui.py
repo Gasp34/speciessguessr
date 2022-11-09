@@ -10,7 +10,7 @@ from time import sleep
 
 from speciesguessr.species import SpeciesInfo
 from speciesguessr.guessr import Guessr
-from speciesguessr.utils import set_random_answers, taxon_to_id, place_to_id, text_dict, lang_dict, set_neighbor_answers
+from speciesguessr.utils import set_random_answers, taxon_to_id, place_to_id, text_dict, lang_dict, set_neighbor_answers, load_image
 
 
 class Config():
@@ -42,7 +42,7 @@ def menu_layout(lang):
               [sg.Button(text("easy"), key="easy", size=(15, 3), expand_x=True),
                sg.Button(text("medium"), key="medium", size=(15, 3), expand_x=True),
                sg.Button(text("hard"), key="hard", size=(15, 3), expand_x=True)],
-              [sg.ProgressBar(max_value=3, size=(1, 20), key="pb", expand_x=True)]
+              [sg.ProgressBar(max_value=4, size=(1, 20), key="pb", expand_x=True)]
               ]
 
     return layout
@@ -58,6 +58,7 @@ while not mode and not end:
     window.TKroot.focus_force()
     while True:
         event, values = window.read()
+        print(event)
         if event == sg.WIN_CLOSED or event.startswith('Escape'):
             end = True
             break
@@ -79,10 +80,10 @@ while not mode and not end:
                         popular=values["C2"])
         if mode == "hard":
             config.height -= 100
-        # print(vars(config))
         end = False
-        species_info = SpeciesInfo(config)
         window["pb"].update_bar(1)
+        species_info = SpeciesInfo(config)
+        window["pb"].update_bar(2)
 
         if species_info.species_list is None:
             end = True
@@ -102,7 +103,8 @@ while not mode and not end:
 
     if mode in ["easy", "medium"] and not end:
         layout = [[sg.Column([[sg.Text(f"{values['places']} - {values['taxons']} - {species_info.nb_species} {text_dict['species'][lang]}"),
-                               sg.Text(f"     Photo : {attribution}", key="attribution")]], justification="center")],
+                               sg.Text(f"     Photo : {attribution}", key="attribution"),
+                               sg.Button(text_dict["change"][lang], key="Reload")]], justification="center")],
                   [sg.Image(key="-IMAGE-", size=(config.width, config.height))],
                   [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
                                sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
@@ -130,6 +132,11 @@ while not mode and not end:
                 verify, i = True, int(event[1])
             elif type(event) == str and event in ["1", "2", "3", "4"]:
                 verify, i = True, int(event[0])
+            if event == "Reload" or event.startswith("Delete"):
+                obs = guessr.find_obs_with_photo(species_to_guess["id"])
+                image = load_image(obs, config)
+                window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
+                window["attribution"].update(f"     Photo : {obs.photos[0].attribution}")
             if verify:
                 if species_to_guess == answers[i-1]:
                     fail = False
@@ -146,7 +153,7 @@ while not mode and not end:
                 window.refresh()
                 if fail:
                     sleep(1)
-    
+
                 species_to_guess, image, attribution = guessr.get_new_guess(config)
                 window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
                 window["attribution"].update(f"     Photo : {attribution}")
@@ -163,22 +170,23 @@ while not mode and not end:
         choices = species_info.species_name
 
         layout = [[sg.Column([[sg.Text(f"{values['places']} - {values['taxons']} - {species_info.nb_species} {text_dict['species'][lang]}"),
-                               sg.Text(f"     Photo : {attribution}", key="attribution")]], justification="center")],
+                               sg.Text(f"     Photo : {attribution}", key="attribution"),
+                               sg.Button(text_dict["change"][lang], key="Reload")]], justification="center")],
                   [sg.Image(key="-IMAGE-", size=(config.width, config.height))],
                   [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
                                sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
                              justification="center")],
                   [sg.Column([[sg.Input(size=(input_width, 1), enable_events=True, key='-IN-', focus=True)],
-                  [sg.pin(sg.Col([[sg.Listbox(values=[], size=(input_width, num_items_to_show), enable_events=True, key='-BOX-',
+                              [sg.pin(sg.Col([[sg.Listbox(values=[], size=(input_width, num_items_to_show), enable_events=True, key='-BOX-',
                                               select_mode=sg.LISTBOX_SELECT_MODE_SINGLE, no_scrollbar=True)]],
-                   key='-BOX-CONTAINER-', pad=(0, 0), visible=False))],
-                  [sg.Text('', key="-ANSWER-", font=('Helvetica', 20))]], justification="center")]
-                  ]
+                                             key='-BOX-CONTAINER-', pad=(0, 0), visible=False))]], justification="center")],
+                  [sg.Column([[sg.Text('', key="-ANSWER-", font=('Helvetica', 20))]], justification="center")]]
 
         window = sg.Window('SpeciesGuessr', layout, location=(20, 20), finalize=True,
                            return_keyboard_events=True, font=('Helvetica', 15), icon="logo.ico", size=(config.width, config.height+215))
         window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
-        # window.TKroot.focus_force()
+        window.TKroot.focus_force()
+        window.Element("-IN-").set_focus(force=True)
         list_element: sg.Listbox = window.Element('-BOX-')
         prediction_list, input_text, sel_item = [], "", 0
 
@@ -219,7 +227,11 @@ while not mode and not end:
                 window['-IN-'].update(value=values['-BOX-'][0])
                 window['-BOX-CONTAINER-'].update(visible=False)
                 verify = True
-
+            if event == "Reload" or event.startswith("Delete"):
+                obs = guessr.find_obs_with_photo(species_to_guess["id"])
+                image = load_image(obs, config)
+                window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
+                window["attribution"].update(f"     Photo : {obs.photos[0].attribution}")
             if verify:
                 guess = values['-BOX-'][0]
                 if guess == species_to_guess["preferred_common_name"]:

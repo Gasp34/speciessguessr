@@ -47,12 +47,12 @@ class Guessr:
         species_to_guess = self.get_random_species()
         obs = self.find_obs_with_photo(species_to_guess["id"])
         if window:
-            window["pb"].update(2)
+            window["pb"].update(3)
         while obs is None:
             species_to_guess = self.get_random_species()
             obs = self.find_obs_with_photo(species_to_guess["id"])
         image = load_image(obs, config)
         if window:
-            window["pb"].update(2)
+            window["pb"].update(4)
         attribution = obs.photos[0].attribution
         return species_to_guess, image, attribution

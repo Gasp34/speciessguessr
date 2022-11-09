@@ -88,6 +88,7 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "easy": {"fr": "Facile", "en": "Easy"},
              "hard": {"fr": "Difficile", "en": "Hard"},
              "medium": {"fr": "Moyen", "en": "Medium"},
+             "change": {"fr": "Changer", "en": "Change"},
              "species": {"fr": "Espèces", "en": "Species"},
              "taxon": {"fr": "Taxon", "en": "Taxon"},
              "taxons": {"fr": ["Oiseau", "Reptile"], "en": ["Bird", "Reptile"]},
