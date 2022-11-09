@@ -184,9 +184,8 @@ while not mode and not end:
         verify, success, fails = False, 0, 0
         while not end:
             event, values = window.read()
-            print(event, values)
             if event == sg.WIN_CLOSED or event.startswith('Escape'):
-                # mode = False
+                mode = False
                 break
             elif event.startswith('Down') and len(prediction_list):
                 sel_item = (sel_item + 1) % len(prediction_list)
@@ -198,6 +197,7 @@ while not mode and not end:
                 if len(values['-BOX-']) > 0:
                     window['-IN-'].update(value=values['-BOX-'][0])
                     window['-BOX-CONTAINER-'].update(visible=False)
+                    verify = True
             elif event == '-IN-':
                 text = values['-IN-'].lower()
                 if text == input_text:
@@ -207,7 +207,6 @@ while not mode and not end:
                 prediction_list = []
                 if text:
                     prediction_list = [item for item in choices if item.lower().startswith(text)]
-                print(prediction_list)
                 list_element.update(values=prediction_list)
                 sel_item = 0
                 list_element.update(set_to_index=sel_item)
@@ -218,22 +217,16 @@ while not mode and not end:
             elif event == '-BOX-':
                 window['-IN-'].update(value=values['-BOX-'][0])
                 window['-BOX-CONTAINER-'].update(visible=False)
+                verify = True
 
-            if type(event) == str and (event[0] == "A"):
-                verify, i = True, int(event[1])
-            elif type(event) == str and event in ["1", "2", "3", "4"]:
-                verify, i = True, int(event[0])
             if verify:
-                if species_to_guess == answers[i-1]:
+                guess = values['-BOX-'][0]
+                if guess == species_to_guess["preferred_common_name"]:
                     fail = False
                     success += 1
-                    window[f"A{i}"].update(button_color="green")
                 else:
                     fail = True
                     fails += 1
-                    window[f"A{i}"].update(button_color="red")
-                    j = answers.index(species_to_guess)
-                    window[f"A{j+1}"].update(button_color="green")
                 window["-SV-"].update(f"{success}/{success+fails}")
                 window["-AV-"].update(f"{int(success/(success+fails)*100)}%")
                 window.refresh()
@@ -243,9 +236,7 @@ while not mode and not end:
                 species_to_guess, image, attribution = guessr.get_new_guess(config)
                 window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
                 window["attribution"].update(f"     Photo : {attribution}")
-                if mode == "easy":
-                    answers = set_random_answers(guessr, window, species_to_guess)
-                elif mode == "medium":
-                    answers = set_neighbor_answers(guessr, window, species_to_guess)
+                window['-IN-'].update('')
+                window['-BOX-CONTAINER-'].update(visible=False)
                 verify = False
         window.close()
