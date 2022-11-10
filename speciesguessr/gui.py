@@ -5,8 +5,11 @@ Created on Sun Oct 30 19:07:20 2022
 @author: ZenbookGaspard
 """
 import PySimpleGUI as sg
+import sys
+
 from PIL import ImageTk
 from time import sleep
+from os.path import join
 
 from speciesguessr.species import SpeciesInfo
 from speciesguessr.guessr import Guessr
@@ -25,7 +28,9 @@ class Config():
         self.popular = popular
 
 
-def menu_layout(lang):
+ico_path = join(sys._MEIPASS, "logo.ico") if getattr(sys, 'frozen', False) else "logo.ico"
+
+def menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def):
     def text(key):
         return text_dict[key][lang]
     layout = [[sg.Column(justification="center", layout=[[sg.Text(text("language")),
@@ -33,13 +38,15 @@ def menu_layout(lang):
                                                                    key="languages", default_value=text("languages")[0])]])],
               [sg.Column(justification="center", layout=[[sg.Text(text("species_language")),
                                                           sg.Combo(text("species_languages"), key="species_languages", readonly=True,
-                                                                   default_value=text("species_languages")[0])]])],
+                                                                   default_value=text("species_languages")[sp_lang_idx])]])],
               [sg.Column(justification="center", layout=[[sg.Text(text("place")),
-                                                          sg.Combo(text("places"), key="places", default_value=text("places")[0], readonly=True,)]])],
+                                                          sg.Combo(text("places"), key="places", default_value=text("places")[place_idx], 
+                                                                   readonly=True, enable_events=True)]])],
               [sg.Column(justification="center", layout=[[sg.Text(text("taxon")),
-                                                          sg.Combo(text("taxons"), key="taxons", default_value=text("taxons")[0], readonly=True,)]])],
-              [sg.Column(justification="center", layout=[[sg.Checkbox(text("checkbox1"), default=True, enable_events=True, key="C1"),
-                                                          sg.Checkbox(text("checkbox2"), enable_events=True, key="C2")]])],
+                                                          sg.Combo(text("taxons"), key="taxons", default_value=text("taxons")[taxon_idx],
+                                                                   readonly=True, enable_events=True)]])],
+              [sg.Column(justification="center", layout=[[sg.Checkbox(text("checkbox1"), default=cb_def, enable_events=True, key="C1"),
+                                                          sg.Checkbox(text("checkbox2"), default=not cb_def, enable_events=True, key="C2")]])],
               [sg.Button(text("easy"), key="easy", size=(15, 3), expand_x=True),
                sg.Button(text("medium"), key="medium", size=(15, 3), expand_x=True),
                sg.Button(text("hard"), key="hard", size=(15, 3), expand_x=True)],
@@ -48,11 +55,11 @@ def menu_layout(lang):
 
 
 sg.theme('Reddit')
-lang = "fr"
+lang, taxon_idx, place_idx, sp_lang_idx, cb_def = "fr", 0, 0, 0, True
 mode, end = False, False
 while not mode and not end:
-    layout = menu_layout(lang)
-    window = sg.Window('SpeciesGuessr', layout, finalize=True, icon="logo.ico",
+    layout = menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def)
+    window = sg.Window('SpeciesGuessr', layout, finalize=True, icon=ico_path,
                        return_keyboard_events=True, font=('Helvetica', 15))
     window.TKroot.focus_force()
     while True:
@@ -68,14 +75,19 @@ while not mode and not end:
             break
         if event == "C1":
             window["C2"].update(not values["C1"])
+            values["C1"] = not values["C1"]
         if event == "C2":
             window["C1"].update(not values["C2"])
-
+            values["C1"] = not values["C1"]
+        taxon_idx = text_dict["taxons"][lang].index(values["taxons"])
+        place_idx = text_dict["places"][lang].index(values["places"])
+        sp_lang_idx = text_dict["species_languages"][lang].index(values["species_languages"])
+        cb_def = values["C1"]
     if mode:
         config = Config(language=lang_dict[values["species_languages"]],
                         place_id=place_to_id(values["places"], text_dict, lang),
                         taxon_id=taxon_to_id(values["taxons"], text_dict, lang),
-                        popular=values["C2"])
+                        popular=not values["C1"])
         if mode == "hard":
             config.height -= 100
         end = False
@@ -88,7 +100,7 @@ while not mode and not end:
             layout = [[sg.Text({"fr": "Communication avec iNaturalist impossible\nVerifier la connexion internet",
                                 "en": "Failed communication with iNaturalist\nCheck internet connection"}[lang])],
                       [sg.Ok()]]
-            window2 = sg.Window('SpeciesGuessr', layout, font=('Helvetica', 15), finalize=True, icon="logo.ico")
+            window2 = sg.Window('SpeciesGuessr', layout, font=('Helvetica', 15), finalize=True, icon=ico_path)
             while True:
                 event, values = window2.read()
                 if event in (sg.WIN_CLOSED, "Ok"):
@@ -97,25 +109,26 @@ while not mode and not end:
         else:
             guessr = Guessr(species_info)
             species_to_guess, image, attribution = guessr.get_new_guess(config, window)
+
+        text = f"{values['places']} - {values['taxons']} - {text_dict['popular'][lang] + ' - ' if config.popular else ''}"
+        text += f"{species_info.nb_species} {text_dict['species'][lang]}"
+
+        layout = [[sg.Column([[sg.Text(text),
+                               sg.Text(f"     Photo : {attribution}", key="attribution"),
+                               sg.Button(text_dict["change"][lang], key="Reload")]], justification="center")],
+                  [sg.Image(key="-IMAGE-", size=(config.width, config.height))],
+                  [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
+                               sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
+                             justification="center")]]
+        
     window.close()
-
-    text = f"{values['places']} - {values['taxons']} - {text_dict['popular'][lang] + ' - ' if config.popular else ''}"
-    text += f"{species_info.nb_species} {text_dict['species'][lang]}"
-
-    layout = [[sg.Column([[sg.Text(text),
-                           sg.Text(f"     Photo : {attribution}", key="attribution"),
-                           sg.Button(text_dict["change"][lang], key="Reload")]], justification="center")],
-              [sg.Image(key="-IMAGE-", size=(config.width, config.height))],
-              [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
-                           sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
-                         justification="center")]]
 
     if mode in ["easy", "medium"] and not end:
         layout.append([sg.B(key='A1', expand_x=True), sg.B(key='A2', expand_x=True),
                        sg.B(key='A3', expand_x=True), sg.B(key='A4', expand_x=True)])
 
         window = sg.Window('SpeciesGuessr', layout, location=(20, 20), finalize=True,
-                           return_keyboard_events=True, font=('Helvetica', 15), icon="logo.ico")
+                           return_keyboard_events=True, font=('Helvetica', 15), icon=ico_path)
         window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
         if mode == "easy":
             answers = set_random_answers(guessr, window, species_to_guess)
@@ -178,7 +191,7 @@ while not mode and not end:
                    [sg.Column([[sg.Text('', key="-ANSWER-", font=('Helvetica', 20))]], justification="center")]]
 
         window = sg.Window('SpeciesGuessr', layout, location=(20, 20), finalize=True,
-                           return_keyboard_events=True, font=('Helvetica', 15), icon="logo.ico", size=(config.width, config.height+215))
+                           return_keyboard_events=True, font=('Helvetica', 15), icon=ico_path, size=(config.width, config.height+215))
         window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
         window.TKroot.focus_force()
         window.Element("-IN-").set_focus(force=True)
