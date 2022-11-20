@@ -57,7 +57,6 @@ class SpeciesInfo:
                     species_name.append(unique_name)
                     species_list.append(res["taxon"])
                 else:
-                    print(unique_name)
                     idx = species_name.index(unique_name)
                     if species_list[idx]["observations_count"] < res["taxon"]["observations_count"]:
                         species_list[idx] = res["taxon"]
@@ -75,7 +74,6 @@ class SpeciesInfo:
                         species_name.append(unique_name)
                         species_list.append(res["taxon"])
                     else:
-                        print(unique_name)
                         idx = species_name.index(unique_name)
                         if species_list[idx]["observations_count"] < res["taxon"]["observations_count"]:
                             species_list[idx] = res["taxon"]
