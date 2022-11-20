@@ -7,7 +7,7 @@ Created on Tue Nov  1 11:22:23 2022
 from PIL import Image
 from PIL.ImageOps import pad
 from random import shuffle, randint
-
+import unicodedata
 
 def load_image(obs, config):
     image = Image.open(obs.photos[0].open(size=config.image_quality))
@@ -79,10 +79,15 @@ def taxon_to_id(taxon, text_dict, lang):
         return place_ids[text_dict["taxons"][lang].index(taxon)]
 
 
+def strip_accents(s):
+    # https://stackoverflow.com/questions/517923/what-is-the-best-way-to-remove-accents-normalize-in-a-python-unicode-string
+    return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
+
+
 text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"},
-             "languages": {"fr": ["français", "english"], "en": ["english", "français"]},
+             "languages": {"fr": ["Français", "English"], "en": ["English", "Français"]},
              "species_language": {"fr": "Noms d'espèces", "en": "Species names"},
-             "species_languages": {"fr": ["français", "english", "latin"], "en": ["english", "français", "latin"]},
+             "species_languages": {"fr": ["Français", "English", "Latin"], "en": ["English", "Français", "Latin"]},
              "checkbox1": {"fr": "Toutes les espèces", "en": "All species"},
              "checkbox2": {"fr": "Espèces populaires", "en": "Popular species"},
              "easy": {"fr": "Facile", "en": "Easy"},
@@ -99,4 +104,4 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "place": {"fr": "Zone géographique", "en": "Geographical area"},
              "places": {"fr": ["France", "Europe", "Montpellier"], "en": ["France", "Europe", "Montpellier"]}}
 
-lang_dict = {"english": "en", "français": "fr", "latin": "latin"}
+lang_dict = {"English": "en", "Français": "fr", "Latin": "latin"}

@@ -14,7 +14,8 @@ from os.path import join
 
 from speciesguessr.species import SpeciesInfo
 from speciesguessr.guessr import Guessr
-from speciesguessr.utils import set_random_answers, taxon_to_id, place_to_id, text_dict, lang_dict, set_neighbor_answers, load_image
+from speciesguessr.utils import set_random_answers, taxon_to_id, place_to_id, text_dict, lang_dict
+from speciesguessr.utils import strip_accents, set_neighbor_answers, load_image
 
 
 class Config():
@@ -30,6 +31,7 @@ class Config():
 
 
 ico_path = join(sys._MEIPASS, "logo.ico") if getattr(sys, 'frozen', False) else "logo.ico"
+
 
 def menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def):
     def text(key):
@@ -233,7 +235,8 @@ while not mode and not end:
                     input_text = text
                 prediction_list = []
                 if text:
-                    prediction_list = [item for item in choices if item.lower().startswith(text)]
+                    prediction_list = [item for item in choices if
+                                       strip_accents(item.lower()).startswith(strip_accents(text))]
                 list_element.update(values=prediction_list)
                 sel_item = 0
                 list_element.update(set_to_index=sel_item)
