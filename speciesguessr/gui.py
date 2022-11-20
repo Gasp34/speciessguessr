@@ -258,14 +258,15 @@ while not mode and not end:
                 window["attribution"].update(f"     Photo : {obs.photos[0].attribution}")
             if verify:
                 guess = values['-BOX-'][0]
-                if guess == species_to_guess["preferred_common_name"].capitalize():
+                answer = species_to_guess["preferred_common_name"].capitalize()
+                if guess == answer:
                     fail = False
                     success += 1
-                    window["-ANSWER-"].update(species_to_guess["preferred_common_name"], text_color="green")
+                    window["-ANSWER-"].update(answer, text_color="green")
                 else:
                     fail = True
                     fails += 1
-                    window["-ANSWER-"].update(species_to_guess["preferred_common_name"], text_color="red")
+                    window["-ANSWER-"].update(answer, text_color="red")
                 window["-SV-"].update(f"{success}/{success+fails}")
                 window["-AV-"].update(f"{int(success/(success+fails)*100)}%")
                 window.refresh()
