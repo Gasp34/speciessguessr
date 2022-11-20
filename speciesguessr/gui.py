@@ -63,12 +63,14 @@ mode, end = False, False
 while not mode and not end:
     layout_config = menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def)
     layout = [[sg.TabGroup([[sg.Tab(text_dict["config"][lang], layout_config),
-                             sg.Tab(text_dict["about"][lang], layout=[[sg.Text("SpeciesGuessr v1.0.3 - MIT License")],
-                                                                      [sg.Text("Github :"), sg.Text("https://github.com/Gasp34/speciessguessr",
-                                                                               font=('Helvetica', 15, 'underline'),
-                                                                               enable_events=True, key='git_url')],
-                                                                      [sg.Text("Contact : gaspard.dussert@gmail.com")]
-                                                                      ])]])]]
+                             sg.Tab(text_dict["about"][lang],
+                                    layout=[[sg.Text("SpeciesGuessr v1.0.3 - MIT License")],
+                                            [sg.Text("Github :"),
+                                             sg.Text("https://github.com/Gasp34/speciessguessr",
+                                                     font=('Helvetica', 15, 'underline'),
+                                                     enable_events=True, key='git_url')],
+                                            [sg.Text("Contact : gaspard.dussert@gmail.com",
+                                                     enable_events=True, key='mail_url')]])]])]]
     window = sg.Window('SpeciesGuessr', layout, finalize=True, icon=ico_path,
                        return_keyboard_events=True, font=('Helvetica', 15))
     window.TKroot.focus_force()
@@ -91,6 +93,8 @@ while not mode and not end:
             values["C1"] = not values["C1"]
         if event == "git_url":
             webbrowser.open("https://github.com/Gasp34/speciessguessr")
+        if event == "mail_url":
+            webbrowser.open("mailto:gaspard.dussert@gmail.com")
         taxon_idx = text_dict["taxons"][lang].index(values["taxons"])
         place_idx = text_dict["places"][lang].index(values["places"])
         cb_def = values["C1"]
@@ -132,7 +136,6 @@ while not mode and not end:
                   [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
                                sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
                              justification="center")]]
-        
     window.close()
 
     if mode in ["easy", "medium"] and not end:

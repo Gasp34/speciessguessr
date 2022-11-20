@@ -84,6 +84,10 @@ def strip_accents(s):
     return ''.join(c for c in unicodedata.normalize('NFD', s) if unicodedata.category(c) != 'Mn')
 
 
+def norm(s):
+    return strip_accents(s.lower())
+
+
 text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"},
              "languages": {"fr": ["Français", "English"], "en": ["English", "Français"]},
              "species_language": {"fr": "Noms d'espèces", "en": "Species names"},

@@ -7,6 +7,7 @@ Created on Sun Oct 30 20:55:57 2022
 from igraph import Graph
 
 from pyinaturalist import get_observation_species_counts
+from speciesguessr.utils import norm
 
 
 class SpeciesInfo:
@@ -50,11 +51,14 @@ class SpeciesInfo:
                     continue
                 if self.latin:
                     res["taxon"]["preferred_common_name"] = res["taxon"]["name"]
-                if res["taxon"]["name"] not in species_name:
-                    species_name.append(res["taxon"]["name"])
+                unique_name = norm(res["taxon"]["preferred_common_name"])
+
+                if unique_name not in species_name:
+                    species_name.append(unique_name)
                     species_list.append(res["taxon"])
                 else:
-                    idx = species_name.index(res["taxon"]["name"])
+                    print(unique_name)
+                    idx = species_name.index(unique_name)
                     if species_list[idx]["observations_count"] < res["taxon"]["observations_count"]:
                         species_list[idx] = res["taxon"]
             while len(response["results"]) != 0:
@@ -65,11 +69,14 @@ class SpeciesInfo:
                         continue
                     if self.latin:
                         res["taxon"]["preferred_common_name"] = res["taxon"]["name"]
-                    if res["taxon"]["name"] not in species_name:
-                        species_name.append(res["taxon"]["name"])
+                    unique_name = norm(res["taxon"]["preferred_common_name"])
+
+                    if unique_name not in species_name:
+                        species_name.append(unique_name)
                         species_list.append(res["taxon"])
                     else:
-                        idx = species_name.index(res["taxon"]["name"])
+                        print(unique_name)
+                        idx = species_name.index(unique_name)
                         if species_list[idx]["observations_count"] < res["taxon"]["observations_count"]:
                             species_list[idx] = res["taxon"]
             return species_list
