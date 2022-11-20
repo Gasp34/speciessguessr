@@ -6,6 +6,7 @@ Created on Sun Oct 30 19:07:20 2022
 """
 import PySimpleGUI as sg
 import sys
+import webbrowser
 
 from PIL import ImageTk
 from time import sleep
@@ -58,7 +59,14 @@ sg.theme('Reddit')
 lang, taxon_idx, place_idx, sp_lang_idx, cb_def = "fr", 0, 0, 0, True
 mode, end = False, False
 while not mode and not end:
-    layout = menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def)
+    layout_config = menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def)
+    layout = [[sg.TabGroup([[sg.Tab(text_dict["config"][lang], layout_config),
+                             sg.Tab(text_dict["about"][lang], layout=[[sg.Text("SpeciesGuessr v1.0.3 - MIT License")],
+                                                                      [sg.Text("Github :"), sg.Text("https://github.com/Gasp34/speciessguessr",
+                                                                               font=('Helvetica', 15, 'underline'),
+                                                                               enable_events=True, key='git_url')],
+                                                                      [sg.Text("Contact : gaspard.dussert@gmail.com")]
+                                                                      ])]])]]
     window = sg.Window('SpeciesGuessr', layout, finalize=True, icon=ico_path,
                        return_keyboard_events=True, font=('Helvetica', 15))
     window.TKroot.focus_force()
@@ -79,11 +87,13 @@ while not mode and not end:
         if event == "C2":
             window["C1"].update(not values["C2"])
             values["C1"] = not values["C1"]
+        if event == "git_url":
+            webbrowser.open("https://github.com/Gasp34/speciessguessr")
         taxon_idx = text_dict["taxons"][lang].index(values["taxons"])
         place_idx = text_dict["places"][lang].index(values["places"])
-        sp_lang_idx = text_dict["species_languages"][lang].index(values["species_languages"])
         cb_def = values["C1"]
     if mode:
+        sp_lang_idx = text_dict["species_languages"][lang].index(values["species_languages"])
         config = Config(language=lang_dict[values["species_languages"]],
                         place_id=place_to_id(values["places"], text_dict, lang),
                         taxon_id=taxon_to_id(values["taxons"], text_dict, lang),

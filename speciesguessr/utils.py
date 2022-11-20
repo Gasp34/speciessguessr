@@ -91,6 +91,8 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "change": {"fr": "Changer", "en": "Change"},
              "species": {"fr": "Espèces", "en": "Species"},
              "popular": {"fr": "Populaire", "en": "Popular"},
+             "config": {"fr": "Configuration", "en": "Configuration"},
+             "about": {"fr": "À propos", "en": "About"},
              "taxon": {"fr": "Taxon", "en": "Taxon"},
              "taxons": {"fr": ["Oiseaux", "Amphibiens", "Insectes", "Mammifères", "Reptiles", "Papillons", "Poissons"],
                         "en": ["Bird", "Amphibian", "Insect", "Mammals", "Reptile", "Butterfly", "Fish"]},
