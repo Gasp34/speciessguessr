@@ -36,14 +36,15 @@ def set_random_answers(guessr, window, species_to_guess):
 def set_neighbor_answers(guessr, window, species_to_guess):
     answers = [species_to_guess]
     graph = guessr.species_info.graph
+    conv = guessr.species_info.idx_to_graph
 
     if guessr.species_info.nb_species >= 4:
         order = 0
         possible_answers = []
         while len(possible_answers) < 4:
             order += 1
-            possible_answers = [i for i in graph.neighborhood(species_to_guess["id"], order=order)
-                                if i in guessr.species_info.species_ids]
+            possible_answers = [conv[i] for i in graph.neighborhood(conv.index(species_to_guess["id"]), order=order)
+                                if conv[i] in guessr.species_info.species_ids]
         possible_answers.pop(possible_answers.index(species_to_guess["id"]))
 
         while len(answers) != 4:

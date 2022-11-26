@@ -29,10 +29,17 @@ class SpeciesInfo:
         self.species_ids = []
         self.species_idx = {}
         edges = []
+        self.idx_to_graph = []
         for j, species in enumerate(self.species_list):
             ancestors = species["ancestor_ids"]
             for i in range(len(ancestors)-1):
-                edges += [(ancestors[i], ancestors[i+1])]
+                if ancestors[i] not in self.idx_to_graph:
+                    self.idx_to_graph.append(ancestors[i])
+                if ancestors[i+1] not in self.idx_to_graph:
+                    self.idx_to_graph.append(ancestors[i+1])
+                edge = (self.idx_to_graph.index(ancestors[i]), self.idx_to_graph.index(ancestors[i+1]))
+                if edge not in edges:
+                    edges += [edge]
             self.species_ids.append(species["id"])
             self.species_idx[species["id"]] = j
         self.graph = Graph(edges)

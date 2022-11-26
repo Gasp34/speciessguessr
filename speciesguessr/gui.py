@@ -64,7 +64,7 @@ while not mode and not end:
     layout_config = menu_layout(lang, taxon_idx, place_idx, sp_lang_idx, cb_def)
     layout = [[sg.TabGroup([[sg.Tab(text_dict["config"][lang], layout_config),
                              sg.Tab(text_dict["about"][lang],
-                                    layout=[[sg.Text("SpeciesGuessr v1.0.3 - MIT License")],
+                                    layout=[[sg.Text("SpeciesGuessr v1.0.4 - MIT License")],
                                             [sg.Text("Github :"),
                                              sg.Text("https://github.com/Gasp34/speciessguessr",
                                                      font=('Helvetica', 15, 'underline'),
@@ -259,6 +259,10 @@ while not mode and not end:
             if verify:
                 guess = values['-BOX-'][0]
                 answer = species_to_guess["preferred_common_name"].capitalize()
+
+                # print(species_info.graph.shortest_paths(species_info.species_ids[species_info.species_name.index(guess)],
+                #                                    species_to_guess["id"]))
+
                 if guess == answer:
                     fail = False
                     success += 1
