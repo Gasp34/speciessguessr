@@ -17,6 +17,13 @@ def load_image(obs, config):
 
 
 def set_random_answers(guessr, window, species_to_guess):
+    answers = get_random_answers(guessr, species_to_guess)
+    for i in range(4):
+        window[f"A{i+1}"].update(answers[i]["preferred_common_name"].capitalize(), button_color=('#FFFFFF', '#0079d3'))
+    return answers
+
+
+def get_random_answers(guessr, species_to_guess):
     answers = [species_to_guess]
     if guessr.species_info.nb_species >= 4:
         while len(answers) != 4:
@@ -27,9 +34,6 @@ def set_random_answers(guessr, window, species_to_guess):
         for i in range(3):
             answers.append(guessr.get_random_species())
     shuffle(answers)
-
-    for i in range(4):
-        window[f"A{i+1}"].update(answers[i]["preferred_common_name"].capitalize(), button_color=('#FFFFFF', '#0079d3'))
     return answers
 
 
