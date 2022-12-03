@@ -134,7 +134,7 @@ while not mode and not end:
                                sg.Button(text_dict["change"][lang], key="Reload")]], justification="center")],
                   [sg.Image(key="-IMAGE-", size=(config.width, config.height))],
                   [sg.Column([[sg.Text("Score :"), sg.Text("0/0", key="-SV-"),
-                               sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-")]],
+                               sg.Text("  Accuracy :"), sg.Text("100%", key="-AV-"), sg.Text("", key="-PR-")]],
                              justification="center")]]
     window.close()
 
@@ -198,6 +198,8 @@ while not mode and not end:
         input_width = 50
         num_items_to_show = 3
         choices = species_info.species_name
+        depth = max([species_info.graph.distances(species_info.idx_to_graph.index(i), 0)[0][0]
+                     for i in species_info.species_idx])
 
         layout += [[sg.Column([[sg.Input(size=(input_width, 1), enable_events=True, key='-IN-', focus=True)],
                               [sg.pin(sg.Col([[sg.Listbox(values=[], size=(input_width, num_items_to_show), enable_events=True, key='-BOX-',
@@ -208,12 +210,13 @@ while not mode and not end:
         window = sg.Window('SpeciesGuessr', layout, location=(20, 20), finalize=True,
                            return_keyboard_events=True, font=('Helvetica', 15), icon=ico_path, size=(config.width, config.height+215))
         window["-IMAGE-"].update(data=ImageTk.PhotoImage(image))
+        window["-PR-"].update(f"  {text_dict['hier_acc'][lang]} : 100%")
         window.TKroot.focus_force()
         window.Element("-IN-").set_focus(force=True)
         list_element: sg.Listbox = window.Element('-BOX-')
         prediction_list, input_text, sel_item = [], "", 0
 
-        verify, success, fails = False, 0, 0
+        verify, success, fails, hier_score = False, 0, 0, 0
         while not end:
             event, values = window.read()
             if event == sg.WIN_CLOSED or event.startswith('Escape'):
@@ -260,8 +263,8 @@ while not mode and not end:
                 guess = values['-BOX-'][0]
                 answer = species_to_guess["preferred_common_name"].capitalize()
 
-                # print(species_info.graph.shortest_paths(species_info.species_ids[species_info.species_name.index(guess)],
-                #                                    species_to_guess["id"]))
+                s = species_info.idx_to_graph.index(species_info.species_ids[species_info.species_name.index(guess)])
+                t = species_info.idx_to_graph.index(species_to_guess["id"])
 
                 if guess == answer:
                     fail = False
@@ -271,8 +274,10 @@ while not mode and not end:
                     fail = True
                     fails += 1
                     window["-ANSWER-"].update(answer, text_color="red")
+                hier_score += (1-species_info.graph.distances(s, t)[0][0]/(2*depth))
                 window["-SV-"].update(f"{success}/{success+fails}")
                 window["-AV-"].update(f"{int(success/(success+fails)*100)}%")
+                window["-PR-"].update(f"  {text_dict['hier_acc'][lang]} : {int(hier_score/(success+fails)*100)}%")
                 window.refresh()
                 if fail:
                     sleep(1)

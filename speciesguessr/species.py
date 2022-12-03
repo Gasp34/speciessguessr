@@ -32,6 +32,7 @@ class SpeciesInfo:
         self.idx_to_graph = []
         for j, species in enumerate(self.species_list):
             ancestors = species["ancestor_ids"]
+            ancestors = ancestors[ancestors.index(self.taxon_id):]
             for i in range(len(ancestors)-1):
                 if ancestors[i] not in self.idx_to_graph:
                     self.idx_to_graph.append(ancestors[i])

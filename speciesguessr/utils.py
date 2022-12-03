@@ -101,6 +101,7 @@ text_dict = {"language": {"fr": "Langue du logiciel", "en": "Software language"}
              "change": {"fr": "Changer", "en": "Change"},
              "species": {"fr": "Espèces", "en": "Species"},
              "popular": {"fr": "Populaire", "en": "Popular"},
+             "hier_acc": {"fr": "Accuracy hiérarchique", "en": "Hierarchical accuracy"},
              "config": {"fr": "Configuration", "en": "Configuration"},
              "about": {"fr": "À propos", "en": "About"},
              "taxon": {"fr": "Taxon", "en": "Taxon"},
